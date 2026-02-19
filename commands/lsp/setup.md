@@ -12,13 +12,15 @@ Configure which LSP plugins are enabled at project scope.
 ### 1. Read current plugin state
 
 ```bash
-if command -v jq &>/dev/null; then
-  for f in ~/.claude/settings.json .claude/settings.json; do
-    echo "=== $f ==="; jq -r '.enabledPlugins // {} | to_entries[] | select(.key | test("-lsp@")) | "\(.key) \(.value)"' "$f" 2>/dev/null
-  done
-else
-  for f in ~/.claude/settings.json .claude/settings.json; do echo "=== $f ==="; cat "$f" 2>/dev/null; done
-fi
+for f in ~/.claude/settings.json .claude/settings.json; do
+  echo "=== $f ==="
+  if [ ! -f "$f" ]; then echo "(not found)"; continue; fi
+  if command -v jq &>/dev/null; then
+    jq -r '.enabledPlugins // {} | to_entries[] | select(.key | test("-lsp@")) | "\(.key) \(.value)"' "$f"
+  else
+    cat "$f"
+  fi
+done
 ```
 
 The `~/.claude/settings.json` section = global scope; `.claude/settings.json` = project scope. If no LSP plugins appear anywhere, inform the user and exit.
