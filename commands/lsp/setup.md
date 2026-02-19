@@ -28,23 +28,16 @@ The `~/.claude/settings.json` section = global scope; `.claude/settings.json` = 
 ### 2. Detect project languages
 
 ```bash
-for lang in \
-  "pyright-lsp:*.py pyproject.toml requirements.txt setup.py" \
-  "typescript-lsp:*.ts *.tsx *.js *.jsx tsconfig.json package.json" \
-  "rust-analyzer-lsp:*.rs Cargo.toml" \
-  "gopls-lsp:*.go go.mod" \
-  "lua-lsp:*.lua" \
-  "php-lsp:*.php composer.json" \
-  "kotlin-lsp:*.kt *.kts build.gradle.kts" \
-  "clangd-lsp:*.c *.cpp *.h *.hpp CMakeLists.txt"
-do
-  plugin="${lang%%:*}"
-  patterns="${lang#*:}"
-  count=0
-  for pat in $patterns; do
-    count=$((count + $(find . -maxdepth 5 -name "$pat" -not \( -path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/vendor/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.venv/*' \) 2>/dev/null | wc -l)))
-  done
-  echo "$plugin: $count files"
+_git=$(command -v git &>/dev/null && git rev-parse --git-dir &>/dev/null 2>&1 && echo 1)
+for lang in "pyright-lsp:*.py pyproject.toml requirements.txt setup.py" "typescript-lsp:*.ts *.tsx *.js *.jsx tsconfig.json package.json" "rust-analyzer-lsp:*.rs Cargo.toml" "gopls-lsp:*.go go.mod" "lua-lsp:*.lua" "php-lsp:*.php composer.json" "kotlin-lsp:*.kt *.kts build.gradle.kts" "clangd-lsp:*.c *.cpp *.h *.hpp CMakeLists.txt"; do
+  IFS=' ' read -rA pats <<< "${lang#*:}" 2>/dev/null || read -ra pats <<< "${lang#*:}" 2>/dev/null || pats=(${=${lang#*:}})
+  if [ -n "$_git" ]; then
+    count=$(git ls-files --cached --others --exclude-standard -- "${pats[@]}" 2>/dev/null | wc -l)
+  else
+    args=(); f=1; for pat in "${pats[@]}"; do [ $f -eq 0 ] && args+=("-o"); args+=("-name" "$pat"); f=0; done
+    count=$(find . -maxdepth 5 \( "${args[@]}" \) -not \( -path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/vendor/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.venv/*' \) 2>/dev/null | wc -l)
+  fi
+  echo "${lang%%:*}: $count files"
 done
 ```
 
