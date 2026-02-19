@@ -26,7 +26,6 @@ The `~/.claude/settings.json` section = global scope; `.claude/settings.json` = 
 ### 2. Detect project languages
 
 ```bash
-EXCL="-not \( -path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/vendor/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.venv/*' \)"
 for lang in \
   "pyright-lsp:*.py pyproject.toml requirements.txt setup.py" \
   "typescript-lsp:*.ts *.tsx *.js *.jsx tsconfig.json package.json" \
@@ -41,7 +40,7 @@ do
   patterns="${lang#*:}"
   count=0
   for pat in $patterns; do
-    count=$((count + $(find . -maxdepth 5 -name "$pat" $EXCL 2>/dev/null | wc -l)))
+    count=$((count + $(find . -maxdepth 5 -name "$pat" -not \( -path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/vendor/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.venv/*' \) 2>/dev/null | wc -l)))
   done
   echo "$plugin: $count files"
 done
