@@ -23,6 +23,11 @@
 
 set -euo pipefail
 
+if ! command -v jq &>/dev/null; then
+  echo '{"error":"jq is required but not installed. Install it with: brew install jq  OR  sudo apt install jq  OR  https://jqlang.org/download/"}' >&2
+  exit 1
+fi
+
 GLOBAL_SETTINGS="$HOME/.claude/settings.json"
 PROJECT_SETTINGS=".claude/settings.json"
 

@@ -47,7 +47,9 @@ installed LSP plugin keys, then scans the project for language indicator files. 
 }
 ```
 
-If `plugins` is empty, inform the user that no LSP plugins appear to be installed and exit.
+If the script exits with an error (e.g. `jq` not installed), report the error message to the
+user and exit. If `plugins` is empty, inform the user that no LSP plugins appear to be
+installed and exit.
 
 ### 2. Build the options list
 
