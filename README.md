@@ -188,6 +188,9 @@ Claude Code is Anthropic's official CLI for AI-powered coding assistance.
 - `/subagents:review-ecosystem` - Analyze agent interactions
 - `/worker:run` - Run worker templates
 
+#### LSP Plugin Management
+- `/lsp:setup` - Configure LSP plugins for a project at project scope (see [LSP Setup](#lsp-setup) below)
+
 #### VS Code Integration
 - `/vs:settings-help` - VS Code settings assistance
 - `/vs:tint-workspace` - Tint VS Code workspace
@@ -202,6 +205,21 @@ Claude Code is Anthropic's official CLI for AI-powered coding assistance.
 
 ### Utilities
 - **Global directives** - Coding standards and patterns via CLAUDE.md
+
+## LSP Commands
+
+### `/lsp:setup`
+
+Configures LSP plugins at project scope. Run it once when starting work in a new project:
+
+```
+/lsp:setup
+```
+
+It reads your installed LSP plugins, scans the project for language indicators, then asks
+which plugins to enable. Detected languages are listed first, but you can enable any
+installed plugin regardless of whether matching files exist yet. Your selections are written
+to `.claude/settings.json` in the project root.
 
 ## Usage
 
