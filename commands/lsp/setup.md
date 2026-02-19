@@ -10,7 +10,25 @@ against languages detected in this project, then asks for your preferences.
 
 Run this once when starting work in a new project.
 
-## Plugin–Language Mapping
+## Steps
+
+### 1. Detect installed LSP plugins and project languages
+
+First, check that `jq` is available:
+```bash
+command -v jq
+```
+If missing, tell the user to install it (`brew install jq` / `sudo apt install jq`) and exit.
+
+Read installed LSP plugins from settings:
+```bash
+jq -r '.enabledPlugins // {} | to_entries[] | select(.key | test("-lsp@")) | "\(.key) \(.value)"' \
+  ~/.claude/settings.json .claude/settings.json 2>/dev/null | sort -u
+```
+
+For each plugin found, determine its global vs project state by noting which file each line came from. If no plugins are found, inform the user and exit.
+
+For each plugin's base name (strip `@claude-plugins-official`), scan the project for language indicators using `find . -maxdepth 5 -name <pattern> -not \( -path '*/node_modules/*' -o -path '*/.git/*' -o -path '*/vendor/*' -o -path '*/dist/*' -o -path '*/build/*' -o -path '*/.venv/*' \)`. Stop after 1 match per plugin — you only need detected vs not.
 
 | Plugin | Indicators |
 |---|---|
@@ -22,34 +40,6 @@ Run this once when starting work in a new project.
 | `php-lsp` | `*.php`, `composer.json` |
 | `kotlin-lsp` | `*.kt`, `*.kts`, `build.gradle.kts` |
 | `clangd-lsp` | `*.c`, `*.cpp`, `*.h`, `*.hpp`, `CMakeLists.txt` |
-
-## Steps
-
-### 1. Run the detection script
-
-```bash
-~/.claude/utils/lsp-detect.sh
-```
-
-This reads `~/.claude/settings.json` and `.claude/settings.json` (if present), unions all
-installed LSP plugin keys, then scans the project for language indicator files. Output is JSON:
-
-```json
-{
-  "plugins": {
-    "<plugin>@claude-plugins-official": {
-      "global": true|false|null,
-      "project": true|false|null,
-      "detected": true|false,
-      "sample_files": ["..."]
-    }
-  }
-}
-```
-
-If the script exits with an error (e.g. `jq` not installed), report the error message to the
-user and exit. If `plugins` is empty, inform the user that no LSP plugins appear to be
-installed and exit.
 
 ### 2. Build the options list
 
@@ -65,7 +55,7 @@ detected ones first.
 For each option:
 - **label**: plugin name without `@claude-plugins-official`
 - **description**: combine detection and current state, e.g.:
-  - `Detected (utils/addjob.py) — currently disabled globally, not set at project scope`
+  - `Detected (src/main.py) — currently disabled globally, not set at project scope`
   - `Not detected — currently disabled globally`
 
 Note in the question which plugins were detected, e.g.:
