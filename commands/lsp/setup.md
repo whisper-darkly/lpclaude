@@ -27,10 +27,12 @@ The `~/.claude/settings.json` section = global scope; `.claude/settings.json` = 
 
 ### 2. Detect project languages
 
+Run this exact script verbatim — do not modify or simplify it:
+
 ```bash
 _git=$(command -v git &>/dev/null && git rev-parse --git-dir &>/dev/null 2>&1 && echo 1)
 for lang in "pyright-lsp:*.py pyproject.toml requirements.txt setup.py" "typescript-lsp:*.ts *.tsx *.js *.jsx tsconfig.json package.json" "rust-analyzer-lsp:*.rs Cargo.toml" "gopls-lsp:*.go go.mod" "lua-lsp:*.lua" "php-lsp:*.php composer.json" "kotlin-lsp:*.kt *.kts build.gradle.kts" "clangd-lsp:*.c *.cpp *.h *.hpp CMakeLists.txt"; do
-  IFS=' ' read -rA pats <<< "${lang#*:}" 2>/dev/null || read -ra pats <<< "${lang#*:}" 2>/dev/null || pats=(${=${lang#*:}})
+  IFS=' ' read -rA pats <<< "${lang#*:}" 2>/dev/null || read -ra pats <<< "${lang#*:}"
   if [ -n "$_git" ]; then
     count=$(git ls-files --cached --others --exclude-standard -- "${pats[@]}" 2>/dev/null | wc -l)
   else
